@@ -24,9 +24,6 @@ def RunMonteCarloExperiment(params):
     plt.show()
     plt.savefig(params["fig_dir"])
 
-    
-
-
 
 if __name__ == "__main__":
 

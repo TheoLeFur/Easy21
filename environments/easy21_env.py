@@ -50,7 +50,6 @@ class Environment(object):
         self.action_count = 2
 
     def reset(self):
-
         s = State(Card(True).value, Card(True).value, False)
         return s
 

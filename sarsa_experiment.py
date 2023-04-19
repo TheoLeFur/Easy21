@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 class Sarsa_Trainer(object):
 
-    def __init__(self, params, true_Q = None):
+    def __init__(self, params : dict, true_Q = None) -> None:
 
         self.params = params 
         self.num_epochs = params["num_epochs"]
@@ -50,7 +50,7 @@ def run_experiment():
     lambdas = np.linspace(params["lambda_start"], params["lambda_end"], params["number_lambdas"])
     mc_agent = MonteCarloControlAgent(params)
 
-    print("-----------Training the Monte Carlo Agent-----------")
+    print("-----------  Training the Monte Carlo Agent  -----------")
 
     mc_agent.train()
     Q_true = mc_agent.Q

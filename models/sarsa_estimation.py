@@ -8,8 +8,6 @@ from environments.easy21_env import Environment
 from tqdm import tqdm
 
 
-
-
 class SarsaAgent(BaseModel):
 
     def __init__(self, params: dict) -> None:
@@ -52,50 +50,41 @@ class SarsaAgent(BaseModel):
                 action = Action.stick
         else:
             action = Action.to_action(np.argmax(self.Q[state.dealer - 1, state.player - 1, :]))
+
         return action
 
     def train(self):
+        for episode in tqdm(range(self.num_train_per_epoch)):
+            # random start
+            s = self.environment.reset()
+            a = self.select_action(s)
 
-        for _ in tqdm(range(int(self.num_train_per_epoch))):
-
-            state = self.environment.reset()
-            action = self.select_action(state)
-            score = 0
-
-            while not state.terminal:
-
-                dealer_idx = state.dealer - 1
-                player_idx = state.player - 1
-                action_idx = Action.to_int(action)
-
-                self.N[dealer_idx, player_idx, action_idx] += 1
-                next_state, reward = self.environment.step(state, action)
-
-                if next_state.terminal:
+            while not s.terminal:
+                # update N(s,a)
+                self.N[s.dealer - 1, s.player - 1, Action.to_int(a)] += 1
+                # execute action a and observe s_new, r
+                s_new, r = self.environment.step(s, a)
+                dealer_id = s.dealer - 1
+                player_id = s.player - 1
+                if s_new.terminal:
                     Q_new = 0
-
-
                 else:
-                    new_action = self.select_action(next_state)
-                    Q_new = self.Q[next_state.dealer - 1, next_state.player -
-                                   1, Action.to_int(new_action)]
-
-                alpha = 1. / self.N[state.dealer - 1, state.player - 1, Action.to_int(action)]
-                delta = reward + self.gamma * \
-                        Q_new - self.Q[state.dealer - 1,
-                                       state.player - 1, Action.to_int(action)]
-
-                self.E[state.dealer - 1, state.player -
-                       1, Action.to_int(action)] += 1
-                self.Q += alpha * delta * self.E
+                    a_new = self.select_action(s_new)
+                    dealer_id_new = s_new.dealer - 1
+                    player_id_new = s_new.player - 1
+                    Q_new = self.Q[dealer_id_new, player_id_new, Action.to_int(a_new)]
+                # using a varying step size alpha = 1/N(st,at)
+                alpha = 1.0 / self.N[dealer_id, player_id, Action.to_int(a)]
+                # calculate TD error
+                td_error = r + self.gamma * Q_new - self.Q[dealer_id, player_id, Action.to_int(a)]
+                # update the eligibility trace
+                self.E[dealer_id, player_id, Action.to_int(a)] += 1
+                # update the Q and E for all state-action pairs
+                self.Q += alpha * td_error * self.E
                 self.E *= self.gamma * self.lambda_param
-
-                state = next_state
-                score += reward
-                if not next_state.terminal:
-                    action = new_action
-
-                self.count_wins = self.count_wins + 1 if reward == 1 else self.count_wins
+                s = s_new
+                if not s_new.terminal:
+                    a = a_new
 
         self.episodes += self.num_episodes
 

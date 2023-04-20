@@ -22,7 +22,6 @@ class Sarsa_Trainer(object):
     def train(self):
         for epoch in tqdm(range(self.num_epochs)):
             self.agent.train()
-            print(f"Epoch number {epoch}")
             mse = np.mean((self.agent.Q - self.true_Q) ** 2)
             self.mse_log.append(mse)
 
@@ -30,7 +29,7 @@ class Sarsa_Trainer(object):
 def run_experiment():
     params = dict(
         N0=100,
-        num_episodes=int(1e4),
+        num_episodes=int(1e6),
         num_train_per_epoch=1,
         episode_log_freq=10000,
         num_epochs=1000,
@@ -51,7 +50,7 @@ def run_experiment():
     Q_true = mc_agent.Q
     print(Q_true)
 
-    for lambda_param, lambda_id in enumerate(lambdas):
+    for lambda_id, lambda_param in enumerate(lambdas):
         print(f"-----------Training Sarsa Agent for param lambda = {lambda_param}  -----------")
         training_args = dict(
             **params,

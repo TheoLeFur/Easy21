@@ -8,14 +8,8 @@ from tqdm import tqdm
 
 
 class MonteCarloControlAgent(BaseModel):
-    """
-    A Monte Carlo based agent for simulation. 
-    PARAMS:
-        params : dictionnary of parameters
 
-    """
-
-    def __init__(self, params: dict):
+    def __init__(self, params: dict) -> None:
 
         self.N0 = params["N0"]
         self.environment = params["environment"]
@@ -41,7 +35,9 @@ class MonteCarloControlAgent(BaseModel):
     def select_action(self, state: State) -> Action:
 
         """
-        Selects action based on current state using an epsilon greedy scheme
+        Selects action based on current state using an epsilon greedy scheme.
+        With probability less than epsilon, we select an action randomly from the environment,
+        else we select the action greedily, according to the Bellman backup update.
         """
 
         epsilon = self.N0 / (self.N0 + np.sum(self.N[state.dealer - 1, state.player - 1, :]))
@@ -56,7 +52,9 @@ class MonteCarloControlAgent(BaseModel):
 
     def train(self):
 
-        "trains the agent."
+        """
+
+        """
 
         for episode in tqdm(range(int(self.num_episodes))):
 
@@ -88,7 +86,6 @@ class MonteCarloControlAgent(BaseModel):
         self.episodes += self.num_episodes
 
     def plot(self, ax):
-
         x = np.arange(0, self.environment.dealer_value_count, 1)
         y = np.arange(0, self.environment.player_value_count, 1)
         x, y = np.meshgrid(x, y)

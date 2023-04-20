@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 
 
+
 class SarsaAgent(BaseModel):
 
     def __init__(self, params: dict) -> None:
@@ -50,8 +51,7 @@ class SarsaAgent(BaseModel):
             else:
                 action = Action.stick
         else:
-            action = Action.to_action(
-                np.argmax(self.Q[state.dealer - 1, state.player - 1, :]))
+            action = Action.to_action(np.argmax(self.Q[state.dealer - 1, state.player - 1, :]))
         return action
 
     def train(self):
